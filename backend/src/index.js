@@ -11,8 +11,24 @@ const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
 
-// --- Global middleware ---
-app.use(cors({ origin: config.clientUrl })); // only allow our frontend
+// --- CORS: decide which frontend URLs may call this API ---
+// We allow the configured CLIENT_URL (local dev) and any *.vercel.app URL,
+// so Vercel's changing preview URLs keep working without extra config.
+const allowedOrigins = [config.clientUrl, /\.vercel\.app$/];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Requests with no origin (e.g. curl, health checks) are allowed.
+      if (!origin) return callback(null, true);
+      const isAllowed = allowedOrigins.some((rule) =>
+        rule instanceof RegExp ? rule.test(origin) : rule === origin
+      );
+      callback(isAllowed ? null : new Error("Not allowed by CORS"), isAllowed);
+    },
+  })
+);
+
 app.use(express.json()); // parse JSON request bodies
 
 // --- Routes ---
