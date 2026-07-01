@@ -6,7 +6,7 @@ import axios from "axios";
 const api = axios.create({
   // In production, set VITE_API_URL in the frontend .env file.
   // Falls back to the local backend during development.
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 // Attach the saved token to every request.
